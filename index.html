@@ -1,0 +1,93 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CampusConnect - SDHR</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // This script handles theme initialization and a one-time migration
+      // to ensure 'light' is the default theme for all users.
+      try {
+        const THEME_LOGIC_VERSION_KEY = 'theme_logic_version';
+        const CURRENT_THEME_LOGIC_VERSION = 'v1';
+        
+        const logicVersion = localStorage.getItem(THEME_LOGIC_VERSION_KEY);
+
+        if (logicVersion !== CURRENT_THEME_LOGIC_VERSION) {
+          // First run with new logic: force light theme and update storage.
+          localStorage.setItem('theme', 'light');
+          localStorage.setItem(THEME_LOGIC_VERSION_KEY, CURRENT_THEME_LOGIC_VERSION);
+          document.documentElement.classList.remove('dark');
+        } else {
+          // Subsequent runs: respect the stored theme.
+          const theme = localStorage.getItem('theme');
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        }
+      } catch (_) {
+        // Failsafe: default to light theme if anything goes wrong.
+        try {
+          document.documentElement.classList.remove('dark');
+        } catch(e) {}
+      }
+    </script>
+    <style>
+      /* For Webkit-based browsers (Chrome, Safari) */
+      ::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+      .dark ::-webkit-scrollbar-track {
+        background: #2d3748; /* dark:bg-gray-700 */
+      }
+       .dark ::-webkit-scrollbar-thumb {
+        background: #718096; /* dark:bg-gray-500 */
+      }
+       .dark ::-webkit-scrollbar-thumb:hover {
+        background: #a0aec0; /* dark:bg-gray-400 */
+      }
+      
+      @keyframes marquee {
+        from { transform: translateX(0); }
+        to { transform: translateX(-100%); }
+      }
+      .animate-marquee {
+        animation: marquee 40s linear infinite;
+      }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.1.1/",
+    "react": "https://esm.sh/react@^19.1.1",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.1/",
+    "vite": "https://esm.sh/vite@^7.1.1",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^5.0.0"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-gray-100 dark:bg-gray-900">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
