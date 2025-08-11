@@ -1,10 +1,11 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useEffect } from 'react';
 import { Post, Media } from '../types';
 import { useAuth } from './useAuth';
-import { postsData } from '../data/posts';
+import { API_ENDPOINTS } from '../src/config/api';
 
 interface PostContextType {
     posts: Post[];
+    isLoading: boolean;
     addPost: (title: string, content: string, media: Media[]) => Promise<Post>;
     updatePost: (postId: string, updatedData: { title: string; content: string; media: Media[] }) => Promise<void>;
     deletePost: (postId: string) => Promise<void>;
@@ -13,8 +14,32 @@ interface PostContextType {
 const PostContext = createContext<PostContextType | undefined>(undefined);
 
 export const PostProvider: React.FC<{children: ReactNode}> = ({ children }) => {
-    const [posts, setPosts] = useState<Post[]>(postsData);
+    const [posts, setPosts] = useState<Post[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const { currentUser } = useAuth();
+
+    // Fetch posts from backend on component mount
+    useEffect(() => {
+        const fetchPosts = async () => {
+            try {
+                setIsLoading(true);
+                const response = await fetch(API_ENDPOINTS.POSTS);
+                if (!response.ok) {
+                    throw new Error('Failed to fetch posts');
+                }
+                const data = await response.json();
+                setPosts(data);
+            } catch (error) {
+                console.error('Error fetching posts:', error);
+                // Fallback to empty array if API fails
+                setPosts([]);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchPosts();
+    }, []);
 
     const addPost = useCallback(async (title: string, content: string, media: Media[]): Promise<Post> => {
         if (!currentUser?.name) {
@@ -72,7 +97,7 @@ export const PostProvider: React.FC<{children: ReactNode}> = ({ children }) => {
 
 
     return (
-        <PostContext.Provider value={{ posts, addPost, updatePost, deletePost }}>
+        <PostContext.Provider value={{ posts, isLoading, addPost, updatePost, deletePost }}>
             {children}
         </PostContext.Provider>
     );
